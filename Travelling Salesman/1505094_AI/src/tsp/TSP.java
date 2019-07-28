@@ -209,7 +209,7 @@ public class TSP {
         return vec;
     }
 
-    public Vector SavingsHeuristics(double[][] matrix, int source, int centre) {
+    public Vector SavingsHeuristics(double[][] matrix, int centre) {
         Deque<Integer> dq = new LinkedList<>();
         Vector<Integer> vec = new Vector<>();
         int n = matrix.length;
@@ -274,7 +274,7 @@ public class TSP {
             }
         }
         dq.addFirst(centre);
-        System.out.println(dq.size());
+        //System.out.println(dq.size());
         Iterator iterator = dq.iterator();
         while (iterator.hasNext()) {
             vec.add((Integer) iterator.next());
@@ -283,7 +283,7 @@ public class TSP {
         return vec;
     }
 
-    public Vector SavingsHeuristicsRand(double[][] matrix, int source, int centre) {
+    public Vector SavingsHeuristicsRand(double[][] matrix,int centre) {
         Deque<Integer> dq = new LinkedList<>();
         Vector<Integer> vec = new Vector<>();
         int n = matrix.length;
@@ -354,7 +354,7 @@ public class TSP {
             }
         }
         dq.addFirst(centre);
-        System.out.println(dq.size());
+        //System.out.println(dq.size());
         Iterator iterator = dq.iterator();
         while (iterator.hasNext()) {
             vec.add((Integer) iterator.next());
@@ -409,6 +409,36 @@ public class TSP {
         return vec;
     }
     
+    public Vector TwoOptHeuristicAlgoBest(double[][] matrix, Vector<Integer> vec) {
+        //Vector<Integer> vec = new Vector<>();
+        Vector<Integer> vect = new Vector<>();
+        //vec = NearestNeighbourAlgo(matrix, source);
+
+        while (true) {
+            double bestCost = calcCost(vec, matrix);
+            boolean flag = false;
+            for (int i = 1; i < vec.size() - 2; i++) {
+                for (int j = i + 1; j < vec.size() - 1; j++) {
+                    vect = TwoOptSwap(vec, i, j);
+                    double newCost = calcCost(vect, matrix);
+                    if (newCost < bestCost) {
+                        vec = vect;
+                        flag = true;
+                        continue;
+                    }
+                }
+                if (flag == true) {
+                    continue;
+                }
+            }
+            if (flag == false) {
+                break;
+            }
+        }
+
+        return vec;
+    }
+    
     
     double calcCost(Vector<Integer> v, double[][] mat) {
         double cost = (double) 0.0;
@@ -446,6 +476,23 @@ public class TSP {
         System.out.println("Cost : " + min);
         System.out.println("Source : " + idx);
         return vec;
+    }
+    
+    public int BestTourSource(Tour[] t) {
+        Vector<Integer> vec = new Vector<>();
+        int idx = 0;
+        double min = 10000000;
+        for (int i = 0; i < t.length; i++) {
+            if (min > t[i].costOfTour) {
+                min = t[i].costOfTour;
+                vec = t[i].route;
+                idx = t[i].s;
+            }
+        }
+        //System.out.print("Best Route : ");
+        
+        
+        return idx;
     }
 
     public int WorstTour(Tour[] t) {
@@ -525,12 +572,12 @@ public class TSP {
             }
         }
         //float a =  TSP.distance(l1, l2);
-        for (int i = 1; i < numberOfNodes + 1; i++) {
+        /*for (int i = 1; i < numberOfNodes + 1; i++) {
             for (int j = 1; j < numberOfNodes + 1; j++) {
                 System.out.print(mat[i][j] + "\t");
             }
             System.out.println();
-        }
+        }*/
         Random rand = new Random();
         Vector<Integer> NNH = new Vector<>();
         System.out.println("*****Nearest Neighbour******");
@@ -548,6 +595,7 @@ public class TSP {
             tsp.printVector(anArray[i], mat);
         }
         Vector<Integer> tt1 = tsp.BestTour(t);
+        int bbb = tsp.BestTourSource(t);
         int ttw = tsp.WorstTour(t);
         tsp.AverageCost(t);
         //NNH.add(tt1);
@@ -559,7 +607,7 @@ public class TSP {
             vec[i] = new Vector<Integer>();
         }
         for (int i = 0; i < vec.length; i++) {
-            vec[i] = tsp.NearestNeighbourRand(mat, 10);
+            vec[i] = tsp.NearestNeighbourRand(mat, bbb);
             t1[i] = new Tour();
             t1[i].route = vec[i];
             t1[i].costOfTour = tsp.calcCost(vec[i], mat);
@@ -581,9 +629,9 @@ public class TSP {
             task_thr_vec[i] = tsp.TwoOptHeuristicAlgoNNH(mat, t1[i].route);
             
             task3[i].route = task_thr_vec[i];
-            task3[i].costOfTour = tsp.calcCost(task_thr_vec[i], mat);
+            task3[i].costOfTour = tsp.calcCost(task3[i].route, mat);
             task3[i].s = task3[i].route.elementAt(0);
-            tsp.printVector(task_thr_vec[i], mat);
+            tsp.printVector( task3[i].route, mat);
         }
         task3[3].route = tsp.TwoOptHeuristicAlgoNNH(mat, tt1);
         task3[3].costOfTour = tsp.calcCost(task3[3].route, mat);
@@ -592,6 +640,29 @@ public class TSP {
         tsp.BestTour(task3);
         tsp.WorstTour(task3);
         tsp.AverageCost(task3);
+        
+        System.out.println("Two-Opt Best NNH");
+        Vector<Integer>[] task_thr_vec1 = (Vector<Integer>[]) new Vector[4];
+        Tour[] btask3 = new Tour[4];
+        for (int i = 0; i < task_thr_vec1.length; i++) {
+            task_thr_vec1[i] = new Vector<Integer>();
+            btask3[i] = new Tour();
+        }
+        for (int i = 0; i < 3; i++) {
+            task_thr_vec1[i] = tsp.TwoOptHeuristicAlgoBest(mat, t1[i].route);
+            
+            btask3[i].route = task_thr_vec1[i];
+            btask3[i].costOfTour = tsp.calcCost(task_thr_vec1[i], mat);
+            btask3[i].s = btask3[i].route.elementAt(0);
+            tsp.printVector(btask3[i].route, mat);
+        }
+        btask3[3].route = tsp.TwoOptHeuristicAlgoBest(mat, tt1);
+        btask3[3].costOfTour = tsp.calcCost(btask3[3].route, mat);
+        btask3[3].s = btask3[3].route.elementAt(0);
+        tsp.printVector(btask3[3].route, mat);
+        tsp.BestTour(btask3);
+        tsp.WorstTour(btask3);
+        tsp.AverageCost(btask3);
         
         
 
@@ -602,7 +673,7 @@ public class TSP {
             vecc[i] = new Vector<Integer>();
         }
         for (int i = 0; i < vecc.length; i++) {
-            vecc[i] = tsp.SavingsHeuristics(mat, 6, rand.nextInt(numberOfNodes) + 1);
+            vecc[i] = tsp.SavingsHeuristics(mat,rand.nextInt(numberOfNodes) + 1);
             t2[i] = new Tour();
             t2[i].route = vecc[i];
             t2[i].costOfTour = tsp.calcCost(vecc[i], mat);
@@ -610,6 +681,7 @@ public class TSP {
             tsp.printVector(vecc[i], mat);
         }
         Vector<Integer> tt2 = tsp.BestTour(t2);
+        int bbb2 = tsp.BestTourSource(t2);
         tsp.WorstTour(t2);
         tsp.AverageCost(t2);
         System.out.println("*****Savings Random Heuristics******");
@@ -619,7 +691,7 @@ public class TSP {
             hh[i] = new Vector<Integer>();
         }
         for (int i = 0; i < hh.length; i++) {
-            hh[i] = tsp.SavingsHeuristicsRand(mat, 6, 10);
+            hh[i] = tsp.SavingsHeuristicsRand(mat, bbb2);
             t3[i] = new Tour();
             t3[i].route = hh[i];
             t3[i].costOfTour = tsp.calcCost(hh[i], mat);
@@ -627,9 +699,11 @@ public class TSP {
             tsp.printVector(hh[i], mat);
         }
         tsp.BestTour(t3);
+        //int bbb2 = tsp.BestTourSource(t3);
         int tttw = tsp.WorstTour(t3);
         tsp.AverageCost(t3);
         tsp.bubbleSort(t3);
+        System.out.println("Two opt Savings");
         
         Vector<Integer>[] task_fr_vec = (Vector<Integer>[]) new Vector[4];
         Tour[] task4 = new Tour[4];
@@ -641,7 +715,7 @@ public class TSP {
             task_fr_vec[i] = tsp.TwoOptHeuristicAlgoNNH(mat, t3[i].route);
             
             task4[i].route = task_fr_vec[i];
-            task4[i].costOfTour = tsp.calcCost(task_fr_vec[i], mat);
+            task4[i].costOfTour = tsp.calcCost(task4[i].route, mat);
             task4[i].s = task_fr_vec[i].elementAt(0);
             tsp.printVector(task4[i].route, mat);
         }
@@ -652,6 +726,30 @@ public class TSP {
         tsp.BestTour(task4);
         tsp.WorstTour(task4);
         tsp.AverageCost(task4);
+        
+        System.out.println("Two opt Best Savings");
+        
+        Vector<Integer>[] task_fr_vec1 = (Vector<Integer>[]) new Vector[4];
+        Tour[] btask4 = new Tour[4];
+        for (int i = 0; i < task_fr_vec1.length; i++) {
+            task_fr_vec1[i] = new Vector<Integer>();
+            btask4[i] = new Tour();
+        }
+        for (int i = 0; i < 3; i++) {
+            task_fr_vec1[i] = tsp.TwoOptHeuristicAlgoBest(mat, t3[i].route);
+            
+            btask4[i].route = task_fr_vec1[i];
+            btask4[i].costOfTour = tsp.calcCost(btask4[i].route, mat);
+            btask4[i].s = task_fr_vec1[i].elementAt(0);
+            tsp.printVector(btask4[i].route, mat);
+        }
+        btask4[3].route = tsp.TwoOptHeuristicAlgoBest(mat, tt2);
+        btask4[3].costOfTour = tsp.calcCost(btask4[3].route, mat);
+        btask4[3].s = btask4[3].route.elementAt(0);
+        tsp.printVector(task4[3].route, mat);
+        tsp.BestTour(btask4);
+        tsp.WorstTour(btask4);
+        tsp.AverageCost(btask4);
 
     }
 
