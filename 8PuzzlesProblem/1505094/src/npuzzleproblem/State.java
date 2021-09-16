@@ -124,7 +124,7 @@ public class State {
             for(int j = 0; j < n; j++){
                 if(mat[i][j]!= 0 && mat[i][j] != (i*n + j + 1)){
                    row = (mat[i][j] - 1) / n;
-                   col = (mat[i][j] - 1) % n;
+                   col = ((n != 0) ? ((mat[i][j] - 1) % n) : 0);
                    man = man + Math.abs(row - i) + Math.abs(col - j);
                   
                 }
