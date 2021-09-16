@@ -39,7 +39,20 @@ public class State {
         this.boat = boat;
         this.boatCapacity = boatCapacity;
         this.ParentState = ParentState;
-        path_cost = ParentState.path_cost + 1;
+        /* ********OpenRefactory Warning********
+		 Possible null pointer Dereference!
+		 Path: 
+			File: MCProblem.java, Line: 95
+				State newState=new State(p.mlb,p.clb,p.boat,p.mrb,p.crb,p.boatCapacity,n);
+				 Information is passed through the method call via n to the formal param ParentState of the method. This later results into a null pointer dereference.
+			File: State.java, Line: 41
+				this.ParentState=ParentState;
+				ParentState is used to assign a value.
+			File: State.java, Line: 42
+				path_cost=ParentState.path_cost + 1;
+				ParentState is referenced in field access.
+		*/
+		path_cost = ParentState.path_cost + 1;
     }
 
     public boolean IsGoalNode() {
